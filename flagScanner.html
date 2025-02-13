@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Flag Detector</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+        .arjs-loader {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .arjs-loader div {
+            text-align: center;
+            font-size: 1.25em;
+            color: white;
+        }
+    </style>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+    <div class="arjs-loader">
+        <div>Loading, please wait...</div>
+    </div>
+
+    <script>
+        // Check camera access first
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                console.log('Camera access granted');
+                stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+            })
+            .catch(err => console.error('Camera access denied:', err));
+
+        // Handle cleanup before page unload
+        window.addEventListener('beforeunload', () => {
+            const video = document.querySelector('.a-canvas');
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // Flag handler component
+        AFRAME.registerComponent('flag-handler', {
+            init: function() {
+                this.flagPages = {
+                    "cambodia": "cambodia.html",
+                    "australia": "australia.html"
+                };
+
+                // Bind methods
+                this.markerFound = this.markerFound.bind(this);
+                this.markerLost = this.markerLost.bind(this);
+
+                // Add event listeners
+                this.el.addEventListener('markerFound', this.markerFound);
+                this.el.addEventListener('markerLost', this.markerLost);
+
+                console.log('Flag handler initialized for:', this.el.id);
+            },
+
+            markerFound: function() {
+                const markerId = this.el.id;
+                console.log('Marker found:', markerId);
+                
+                if (!this.flagPages[markerId]) {
+                    console.error('No page defined for marker:', markerId);
+                    return;
+                }
+
+                // Clean up scene
+                const scene = document.querySelector('a-scene');
+                if (scene) {
+                    scene.renderer = null;
+                    scene.effect = null;
+                }
+
+                // Stop camera stream
+                const video = document.querySelector('.a-canvas');
+                if (video && video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                }
+
+                // Navigate after cleanup
+                setTimeout(() => {
+                    window.location.href = this.flagPages[markerId];
+                }, 300);
+            },
+
+            markerLost: function() {
+                console.log('Marker lost:', this.el.id);
+            },
+
+            remove: function() {
+                // Clean up event listeners
+                this.el.removeEventListener('markerFound', this.markerFound);
+                this.el.removeEventListener('markerLost', this.markerLost);
+            }
+        });
+
+        // Scene loaded handler
+        AFRAME.registerComponent('scene-loaded', {
+            init: function() {
+                const loader = document.querySelector('.arjs-loader');
+                if (loader) {
+                    loader.style.display = 'none';
+                }
+                console.log('Scene loaded successfully');
+            }
+        });
+    </script>
+
+    <a-scene
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true; precision: medium;"
+        embedded
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth:640; sourceHeight:480;"
+        scene-loaded
+    >
+        <a-nft
+            id="cambodia"
+            flag-handler
+            type="nft"
+            url="https://rilakkuma-dance.github.io/AR_test/cambodia/cambodia"
+            smooth="true"
+            smoothCount="30"
+            smoothTolerance="0.01"
+            smoothThreshold="20"
+        >
+        </a-nft>
+
+        <a-nft
+            id="australia"
+            flag-handler
+            type="nft"
+            url="https://rilakkuma-dance.github.io/AR_test/australia/australia"
+            smooth="true"
+            smoothCount="30"
+            smoothTolerance="0.01"
+            smoothThreshold="20"
+        >
+        </a-nft>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+</html>

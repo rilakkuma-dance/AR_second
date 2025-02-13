@@ -1,7 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start AR</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Center everything */
+      align-items: center;
+      height: 100vh;
+      background: skyblue;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 5vh 5vw; /* Responsive padding */
+    }
+
+    h1 {
+      color: white;
+      font-size: clamp(1.8rem, 4vw, 3rem); /* Responsive text */
+      margin-bottom: 2vh;
+    }
+
+    /* Logo Image */
+    #arlogoImage {
+      width: clamp(150px, 40vw, 300px); /* Adjust size dynamically */
+      height: auto;
+      margin-bottom: 4vh;
+    }
+
+    /* Button */
+    button {
+      padding: 1.5vh 3vw;
+      font-size: clamp(16px, 2vw, 20px);
+      background: white;
+      color: skyblue;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      width: clamp(150px, 40vw, 250px);
+      min-height: 50px;
+      font-weight: bold;
+    }
+
+    button:hover { 
+      background: #0056b3;
+      color: white;
+    }
+
+    /* Mobile Tweaks */
+    @media (max-width: 600px) {
+      body {
+        padding: 5vh 2vw;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      #arlogoImage {
+        width: 50vw;
+      }
+
+      button {
+        width: 60vw;
+      }
+    }
+  </style>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+
+  <h1>AR English Learning</h1>
+  <img id="arlogoImage" src="arlogo.png" alt="logo">  
+  <button onclick="startAR()">Start AR</button>
+
+  <script>
+    function startAR() {
+      window.location.href = "intro1-1.html"; // Redirect to AR page
+    }
+  </script>
+
 </body>
 </html>
