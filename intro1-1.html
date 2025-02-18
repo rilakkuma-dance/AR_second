@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* Previous styles remain the same */
     body {
       margin: 0;
       display: flex;
@@ -141,32 +142,42 @@
   <button id="nextButton">Next</button>
 
   <script>
-    // Wait for DOM to be fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      // Get button elements
-      const nextButton = document.getElementById('nextButton');
-      const backButton = document.querySelector('.back-button');
-      
-      // Add click event listeners
-      if (nextButton) {
-        nextButton.addEventListener('click', function() {
-          if ('vibrate' in navigator) {
-            navigator.vibrate(200);
-          }
-          window.location.href = 'intro1-2.html';
-        });
+    // Function to handle vibration
+    function vibrate() {
+      // Check if vibration is supported
+      if ('vibrate' in navigator) {
+        try {
+          // Try to vibrate
+          navigator.vibrate(200);
+        } catch (e) {
+          console.log('Vibration failed:', e);
+        }
+      } else {
+        console.log('Vibration not supported');
       }
+    }
 
-      if (backButton) {
-        backButton.addEventListener('click', function() {
-          if ('vibrate' in navigator) {
-            navigator.vibrate(200);
-          }
-          window.location.href = 'index.html';
-        });
-      }
-    });
+    // Function to handle next button click
+    function handleNext(e) {
+      e.preventDefault(); // Prevent default button behavior
+      vibrate(); // Trigger vibration
+      // Small delay before navigation to ensure vibration happens
+      setTimeout(() => {
+        window.location.href = 'intro1-2.html';
+      }, 50);
+    }
 
+    // Function to handle back button click
+    function handleBack(e) {
+      e.preventDefault(); // Prevent default button behavior
+      vibrate(); // Trigger vibration
+      // Small delay before navigation to ensure vibration happens
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 50);
+    }
+
+    // Camera handling
     let cameraStream;
 
     function openCamera() {
@@ -188,6 +199,23 @@
           sessionStorage.setItem("cameraAccess", "denied");
         });
     }
+
+    // Initialize everything when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      const nextButton = document.getElementById('nextButton');
+      const backButton = document.getElementById('backButton');
+      
+      // Add touch and click events for better mobile support
+      if (nextButton) {
+        nextButton.addEventListener('touchstart', handleNext, { passive: false });
+        nextButton.addEventListener('click', handleNext);
+      }
+
+      if (backButton) {
+        backButton.addEventListener('touchstart', handleBack, { passive: false });
+        backButton.addEventListener('click', handleBack);
+      }
+    });
 
     // Clean up camera stream when leaving the page
     window.addEventListener('beforeunload', function() {
