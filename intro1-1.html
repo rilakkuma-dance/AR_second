@@ -16,7 +16,6 @@
       overflow: hidden;
     }
 
-    /* Fullscreen Video Background */
     #cameraFeed {
       position: absolute;
       top: 0;
@@ -24,10 +23,9 @@
       width: 100vw;
       height: 100vh;
       object-fit: cover;
-      z-index: -1; /* Behind the text */
+      z-index: -1;
     }
 
-    /* Elisha Image */
     #elishaImage {
       position: absolute;
       top: 30vh; 
@@ -39,7 +37,6 @@
       z-index: 1;
     }
 
-    /* Text Box */
     .text-box {
       position: absolute;
       top: 15vh;
@@ -63,8 +60,7 @@
       font-size: clamp(1.5em, 4vw, 2em);
     }
 
-    /* Next Button */
-    button {
+    #nextButton {
       padding: 1.5vh 3vw;
       font-size: clamp(16px, 2vw, 20px);
       background: skyblue;
@@ -79,14 +75,13 @@
       transform: translateX(-50%);
       width: 20vw;
       max-width: 200px;
+      z-index: 10;
     }
 
-    button:hover { 
+    #nextButton:hover { 
       background: #0056b3;
-      color: white;
     }
 
-    /* Back Button (Top Left) */
     .back-button {
       position: absolute;
       top: 20px;
@@ -115,7 +110,6 @@
       font-weight: bold;
     }
 
-    /* Mobile Adjustments */
     @media (max-width: 768px) {
       #elishaImage {
         top: 35vh;
@@ -127,62 +121,83 @@
         top: 13vh;
       }
 
-      button {
+      #nextButton {
         width: 60vw;
       }
     }
   </style>
 </head>
 <body>
-
   <video id="cameraFeed" autoplay playsinline></video>
 
-  <!-- Back Button -->
-  <div class="back-button" onclick="goBack()"></div>
+  <div class="back-button" id="backButton"></div>
 
   <div class="text-box">
     <h1>Hello!</h1>
     <h2>សួស្តី!</h2>
   </div>  
+  
   <img id="elishaImage" src="elisha.png" alt="Elisha">
-  <button onclick="startAR()">Next</button>
+  <button id="nextButton">Next</button>
 
   <script>
-    function startAR() {
-      navigator.vibrate(200);
-      window.location.href = "intro1-2.html"; // Next page
-    }
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get button elements
+      const nextButton = document.getElementById('nextButton');
+      const backButton = document.querySelector('.back-button');
+      
+      // Add click event listeners
+      if (nextButton) {
+        nextButton.addEventListener('click', function() {
+          if ('vibrate' in navigator) {
+            navigator.vibrate(200);
+          }
+          window.location.href = 'intro1-2.html';
+        });
+      }
 
-    function goBack() {
-      navigator.vibrate(200);
-      window.location.href = "index.html"; // Previous page
-    }
-    
+      if (backButton) {
+        backButton.addEventListener('click', function() {
+          if ('vibrate' in navigator) {
+            navigator.vibrate(200);
+          }
+          window.location.href = 'index.html';
+        });
+      }
+    });
+
     let cameraStream;
 
-  function openCamera() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then((stream) => {
-        cameraStream = stream;
-        const videoElement = document.getElementById("cameraFeed");
+    function openCamera() {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then((stream) => {
+          cameraStream = stream;
+          const videoElement = document.getElementById("cameraFeed");
 
-        if (videoElement) {
-          videoElement.srcObject = stream;
-          sessionStorage.setItem("cameraAccess", "granted");
-        } else {
-          console.error("Camera video element not found. Retrying...");
-          setTimeout(openCamera, 500); // Retry after 500ms
-        }
-      })
-      .catch((error) => {
-        console.error("Camera access denied:", error);
-        sessionStorage.setItem("cameraAccess", "denied");
-      });
-  }
+          if (videoElement) {
+            videoElement.srcObject = stream;
+            sessionStorage.setItem("cameraAccess", "granted");
+          } else {
+            console.error("Camera video element not found. Retrying...");
+            setTimeout(openCamera, 500);
+          }
+        })
+        .catch((error) => {
+          console.error("Camera access denied:", error);
+          sessionStorage.setItem("cameraAccess", "denied");
+        });
+    }
 
-  // Run only after the page is fully loaded
-  window.onload = openCamera;
+    // Clean up camera stream when leaving the page
+    window.addEventListener('beforeunload', function() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    });
+
+    // Initialize camera after page load
+    window.addEventListener('load', openCamera);
   </script>
-
 </body>
 </html>
