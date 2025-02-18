@@ -5,37 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-    <script>
-        AFRAME.registerComponent('marker-handler', {
-            init: function() {
-                this.el.addEventListener('markerFound', () => {
-                    // Hide the text by moving it far away
-                    const scanText = document.querySelector('#scanText');
-                    if (scanText) {
-                        scanText.setAttribute('position', '0 1000 -1');
-                    }
-                    // Hide loading screen
-                    document.querySelector('.arjs-loader').style.display = 'none';
-                });
-
-                this.el.addEventListener('markerLost', () => {
-                    // Show the text by moving it back
-                    const scanText = document.querySelector('#scanText');
-                    if (scanText) {
-                        scanText.setAttribute('position', '0 0.3 -1');
-                    }
-                });
-            }
-        });
-
-        // Make sure text is visible at start
-        window.onload = function() {
-            const scanText = document.querySelector('#scanText');
-            if (scanText) {
-                scanText.setAttribute('position', '0 0.3 -1');
-            }
-        };
-    </script>
     <style>
         .arjs-loader {
             height: 100%;
@@ -74,26 +43,17 @@
         embedded
         arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth:640; sourceHeight:480;"
     >
-        <a-text 
-            id="scanText"
-            value="Scan"
-            position="0 0.3 -1"
-            align="center"
-            color="white"
-            scale="0.5 0.5 0.5"
-            look-at="[camera]"
-        ></a-text>
         <a-nft
             marker-handler
             type="nft"
-            url="https://rilakkuma-dance.github.io/AR_test/cambodia/cambodia"
+            url="https://rilakkuma-dance.github.io/AR_second/cambodia/cambodia"
             smooth="true"
             smoothCount="30"
             smoothTolerance=".01"
             smoothThreshold="20"
         >
             <a-entity
-                gltf-model="https://rilakkuma-dance.github.io/AR_test/Earth.glb"
+                gltf-model="https://rilakkuma-dance.github.io/AR_second/Earth.glb"
                 scale="2.5 2.5 2.5"
                 position="2 2 0"
                 rotation="0 0 0"
