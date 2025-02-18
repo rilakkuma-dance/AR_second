@@ -25,24 +25,50 @@
             font-size: 1.25em;
             color: white;
         }
+
+        #debug-ui {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+            font-family: monospace;
+        }
     </style>
 </head>
 
 <body style="margin: 0; overflow: hidden;">
     <div class="arjs-loader">
-        <div>Loading, please wait...</div>
+        <div>Loading AR Experience...</div>
+    </div>
+
+    <div id="debug-ui">
+        Camera Status: <span id="camera-status">Checking...</span><br>
+        AR Status: <span id="ar-status">Initializing...</span>
     </div>
 
     <script>
-        // Check camera access first
+        // Debug UI updater
+        function updateDebugUI(cameraStatus, arStatus) {
+            document.getElementById('camera-status').textContent = cameraStatus;
+            document.getElementById('ar-status').textContent = arStatus;
+        }
+
+        // Check camera access
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
-                console.log('Camera access granted');
-                stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+                updateDebugUI('Available', 'Waiting for initialization');
+                stream.getTracks().forEach(track => track.stop());
             })
-            .catch(err => console.error('Camera access denied:', err));
+            .catch(err => {
+                updateDebugUI('Error: ' + err.message, 'Failed');
+                console.error('Camera access denied:', err);
+            });
 
-        // Handle cleanup before page unload
+        // Cleanup handler
         window.addEventListener('beforeunload', () => {
             const video = document.querySelector('.a-canvas');
             if (video && video.srcObject) {
@@ -52,59 +78,62 @@
 
         // Flag handler component
         AFRAME.registerComponent('flag-handler', {
+            schema: {
+                targetUrl: { type: 'string' }
+            },
+
             init: function() {
-                this.flagPages = {
-                    "cambodia": "cambodia.html",
-                    "australia": "australia.html"
+                this.flagData = {
+                    "cambodia": {
+                        url: "cambodia.html",
+                        description: "Cambodia Flag Detected"
+                    },
+                    "australia": {
+                        url: "australia.html",
+                        description: "Australia Flag Detected"
+                    }
                 };
 
-                // Bind methods
-                this.markerFound = this.markerFound.bind(this);
-                this.markerLost = this.markerLost.bind(this);
+                // Error handling
+                this.el.addEventListener('arError', (ev) => {
+                    console.error('AR Error:', ev);
+                    updateDebugUI('OK', 'Error: ' + ev.detail);
+                });
 
-                // Add event listeners
-                this.el.addEventListener('markerFound', this.markerFound);
-                this.el.addEventListener('markerLost', this.markerLost);
+                // Marker detection
+                this.el.addEventListener('markerFound', () => {
+                    const markerId = this.el.id;
+                    console.log('Marker found:', markerId);
+                    updateDebugUI('OK', `Detected: ${markerId}`);
 
-                console.log('Flag handler initialized for:', this.el.id);
-            },
+                    if (!this.flagData[markerId]) {
+                        console.error('No data for marker:', markerId);
+                        return;
+                    }
 
-            markerFound: function() {
-                const markerId = this.el.id;
-                console.log('Marker found:', markerId);
-                
-                if (!this.flagPages[markerId]) {
-                    console.error('No page defined for marker:', markerId);
-                    return;
-                }
+                    // Show success message
+                    const message = document.createElement('div');
+                    message.style.position = 'fixed';
+                    message.style.top = '50%';
+                    message.style.left = '50%';
+                    message.style.transform = 'translate(-50%, -50%)';
+                    message.style.background = 'rgba(0, 255, 0, 0.8)';
+                    message.style.padding = '20px';
+                    message.style.borderRadius = '10px';
+                    message.style.color = 'white';
+                    message.textContent = this.flagData[markerId].description;
+                    document.body.appendChild(message);
 
-                // Clean up scene
-                const scene = document.querySelector('a-scene');
-                if (scene) {
-                    scene.renderer = null;
-                    scene.effect = null;
-                }
+                    // Navigate after delay
+                    setTimeout(() => {
+                        window.location.href = this.flagData[markerId].url;
+                    }, 2000);
+                });
 
-                // Stop camera stream
-                const video = document.querySelector('.a-canvas');
-                if (video && video.srcObject) {
-                    video.srcObject.getTracks().forEach(track => track.stop());
-                }
-
-                // Navigate after cleanup
-                setTimeout(() => {
-                    window.location.href = this.flagPages[markerId];
-                }, 300);
-            },
-
-            markerLost: function() {
-                console.log('Marker lost:', this.el.id);
-            },
-
-            remove: function() {
-                // Clean up event listeners
-                this.el.removeEventListener('markerFound', this.markerFound);
-                this.el.removeEventListener('markerLost', this.markerLost);
+                this.el.addEventListener('markerLost', () => {
+                    console.log('Marker lost:', this.el.id);
+                    updateDebugUI('OK', 'Searching...');
+                });
             }
         });
 
@@ -115,7 +144,8 @@
                 if (loader) {
                     loader.style.display = 'none';
                 }
-                console.log('Scene loaded successfully');
+                updateDebugUI('OK', 'Ready - Scanning for flags');
+                console.log('AR Scene initialized');
             }
         });
     </script>
@@ -124,31 +154,53 @@
         vr-mode-ui="enabled: false"
         renderer="logarithmicDepthBuffer: true; precision: medium;"
         embedded
-        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth:640; sourceHeight:480;"
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono;"
         scene-loaded
     >
+        <!-- Cambodia Flag NFT -->
         <a-nft
             id="cambodia"
             flag-handler
             type="nft"
             url="https://rilakkuma-dance.github.io/AR_second/cambodia/cambodia"
             smooth="true"
-            smoothCount="30"
+            smoothCount="10"
             smoothTolerance="0.01"
-            smoothThreshold="20"
+            smoothThreshold="5"
+            raycaster="objects: .clickable"
+            emitevents="true"
+            cursor="fuse: false; rayOrigin: mouse;"
         >
+            <a-entity
+                position="0 0 0"
+                scale="1 1 1"
+                class="clickable"
+                geometry="primitive: plane; width: 1; height: 1;"
+                material="color: #fff; transparent: true; opacity: 0.5"
+            ></a-entity>
         </a-nft>
 
+        <!-- Australia Flag NFT -->
         <a-nft
             id="australia"
             flag-handler
             type="nft"
-            url="https://rilakkuma-dance.github.io/AR_second/australia/australia"
+            url="https://rilakkuma-dance.github.io/AR_second/austraia/australia"
             smooth="true"
-            smoothCount="30"
+            smoothCount="10"
             smoothTolerance="0.01"
-            smoothThreshold="20"
+            smoothThreshold="5"
+            raycaster="objects: .clickable"
+            emitevents="true"
+            cursor="fuse: false; rayOrigin: mouse;"
         >
+            <a-entity
+                position="0 0 0"
+                scale="1 1 1"
+                class="clickable"
+                geometry="primitive: plane; width: 1; height: 1;"
+                material="color: #fff; transparent: true; opacity: 0.5"
+            ></a-entity>
         </a-nft>
 
         <a-entity camera></a-entity>
