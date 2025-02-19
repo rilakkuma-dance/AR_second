@@ -7,6 +7,7 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
 </head>
 <body>
+    <video id="cameraFeed" autoplay playsinline></video>
     <model-viewer 
         src="Earth.glb" 
         alt="3D Earth Model" 
@@ -14,5 +15,18 @@
         camera-controls 
         style="width: 100vw; height: 100vh;">
     </model-viewer>
+
+    <script>
+        function openCamera() {
+          navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }) // Use back camera if available
+            .then((stream) => {
+              document.getElementById("cameraFeed").srcObject = stream;
+            })
+            .catch((error) => {
+              console.error("Camera access denied:", error);
+            });
+        }
+        openCamera(); // Automatically open camera on page load
+    </script>
 </body>
 </html>
