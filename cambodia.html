@@ -7,6 +7,12 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
 </head>
 <body>
+    <div class="back-button" id="backButton"></div>
+
+    <div class="text-box">
+      <h1>Australia</h1>
+      <h2>អូស្ត្រាលី</h2>
+    </div>  
     <model-viewer 
         src="Earth.glb" 
         alt="3D Earth Model" 
@@ -14,5 +20,23 @@
         camera-controls 
         style="width: 100vw; height: 100vh;">
     </model-viewer>
+
+    <model-viewer 
+        src="Koala.glb" 
+        alt="3D Earth Model" 
+        auto-rotate 
+        camera-controls 
+        style="width: 100vw; height: 100vh;">
+    </model-viewer>
+
+    <model-viewer 
+        src="Kangaroo.glb" 
+        alt="3D Earth Model" 
+        auto-rotate 
+        camera-controls 
+        style="width: 100vw; height: 100vh;">
+    </model-viewer>
+
+    <button id="nextButton">Next</button>
 </body>
 </html>
