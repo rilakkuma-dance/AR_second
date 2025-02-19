@@ -10,12 +10,10 @@
     </style>
 </head>
 <body>
-    <!-- Three.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-    <!-- GLTF Loader for loading GLB files -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
-    <!-- Orbit Controls for rotating and zooming -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/examples/js/controls/OrbitControls.js"></script>
+    
     <script>
         // Scene and Camera Setup
         const scene = new THREE.Scene();
@@ -29,44 +27,57 @@
         light.position.set(5, 10, 7.5).normalize();
         scene.add(light);
 
-        const ambientLight = new THREE.AmbientLight(0x404040, 1); // Soft ambient light
+        const ambientLight = new THREE.AmbientLight(0x404040, 1);
         scene.add(ambientLight);
 
         // Load 3D Earth Model
         const loader = new THREE.GLTFLoader();
+        let earth; // Store reference to the earth model
+
         loader.load(
-            './models/Earth.glb', // Path to your Earth model
+            'Earth.glb',  // Make sure this matches your file name exactly
             function (gltf) {
-                const model = gltf.scene;
-                scene.add(model);
-                model.position.set(0, 0, 0); // Adjust the position
-                model.scale.set(1, 1, 1);   // Adjust the scale if needed
+                earth = gltf.scene;
+                scene.add(earth);
+                earth.position.set(0, 0, 0);
+                earth.scale.set(1, 1, 1);
                 
-                // Optional: Rotate the Earth slowly
-                function animateEarth() {
-                    requestAnimationFrame(animateEarth);
-                    model.rotation.y += 0.005; // Rotate Earth
-                    renderer.render(scene, camera);
-                }
-                animateEarth();
+                // Center camera on loaded model
+                const box = new THREE.Box3().setFromObject(earth);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = camera.fov * (Math.PI / 180);
+                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+                camera.position.set(0, 0, cameraZ * 1.5);
+                camera.lookAt(center);
             },
-            undefined,
+            function (xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            },
             function (error) {
                 console.error('Error loading Earth.glb:', error);
             }
         );
 
-        // Camera Position
+        // Camera Position (initial)
         camera.position.set(2, 2, 5);
 
         // Orbit Controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
+        controls.minDistance = 3;
+        controls.maxDistance = 10;
 
         // Animation Loop
         function animate() {
             requestAnimationFrame(animate);
+            
+            if (earth) {
+                earth.rotation.y += 0.002; // Slow rotation
+            }
+            
             controls.update();
             renderer.render(scene, camera);
         }
