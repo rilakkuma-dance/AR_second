@@ -3,92 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Earth Viewer</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-    </style>
+    <title>3D Earth Model</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/examples/js/controls/OrbitControls.js"></script>
-    
-    <script>
-        // Scene and Camera Setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Add Light
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(5, 10, 7.5).normalize();
-        scene.add(light);
-
-        const ambientLight = new THREE.AmbientLight(0x404040, 1);
-        scene.add(ambientLight);
-
-        // Load 3D Earth Model
-        const loader = new THREE.GLTFLoader();
-        let earth; // Store reference to the earth model
-
-        loader.load(
-            'Earth.glb',  // Make sure this matches your file name exactly
-            function (gltf) {
-                earth = gltf.scene;
-                scene.add(earth);
-                earth.position.set(0, 0, 0);
-                earth.scale.set(1, 1, 1);
-                
-                // Center camera on loaded model
-                const box = new THREE.Box3().setFromObject(earth);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const fov = camera.fov * (Math.PI / 180);
-                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-                camera.position.set(0, 0, cameraZ * 1.5);
-                camera.lookAt(center);
-            },
-            function (xhr) {
-                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            },
-            function (error) {
-                console.error('Error loading Earth.glb:', error);
-            }
-        );
-
-        // Camera Position (initial)
-        camera.position.set(2, 2, 5);
-
-        // Orbit Controls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 3;
-        controls.maxDistance = 10;
-
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            if (earth) {
-                earth.rotation.y += 0.002; // Slow rotation
-            }
-            
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Responsive Design
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    <model-viewer 
+        src="Earth.glb" 
+        alt="3D Earth Model" 
+        auto-rotate 
+        camera-controls 
+        style="width: 100vw; height: 100vh;">
+    </model-viewer>
 </body>
 </html>
