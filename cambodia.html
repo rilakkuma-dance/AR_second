@@ -3,121 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Earth Model with Camera</title>
+    <title>3D Earth Model</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        .container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-        }
-        #cameraFeed {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-        }
-        model-viewer {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            --poster-color: transparent;
-            background-color: transparent;
-        }
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            display: flex;
-            gap: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: rgba(255, 255, 255, 1);
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <video id="cameraFeed" autoplay playsinline></video>
-        <model-viewer 
-            src="Earth.glb"
-            alt="3D Earth Model"
-            auto-rotate
-            camera-controls
-            disable-pan
-            rotation-per-second="30deg"
-            interaction-prompt="none"
-            camera-orbit="0deg 75deg 2.5m"
-            min-camera-orbit="auto auto 2m"
-            max-camera-orbit="auto auto 4m">
-        </model-viewer>
-        <div class="controls">
-            <button onclick="toggleCamera()">Toggle Camera</button>
-            <button onclick="switchCamera()">Switch Camera</button>
-        </div>
-    </div>
+    <video id="cameraFeed" autoplay playsinline>
+    <model-viewer 
+        src="Earth.glb" 
+        alt="3D Earth Model" 
+        auto-rotate 
+        camera-controls 
+        style="width: 100vw; height: 100vh;">
+    </model-viewer>
+    </video>
 
     <script>
-        let currentFacingMode = 'environment';
-        let isCameraActive = true;
-        const videoElement = document.getElementById("cameraFeed");
-
-        function openCamera(facingMode) {
-            navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: facingMode
-                }
-            })
+        function openCamera() {
+          navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }) // Use back camera if available
             .then((stream) => {
-                videoElement.srcObject = stream;
-                videoElement.style.display = 'block';
+              document.getElementById("cameraFeed").srcObject = stream;
             })
             .catch((error) => {
-                console.error("Camera access error:", error);
+              console.error("Camera access denied:", error);
             });
         }
-
-        function toggleCamera() {
-            if (isCameraActive) {
-                videoElement.style.display = 'none';
-                if (videoElement.srcObject) {
-                    const tracks = videoElement.srcObject.getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-            } else {
-                videoElement.style.display = 'block';
-                openCamera(currentFacingMode);
-            }
-            isCameraActive = !isCameraActive;
-        }
-
-        function switchCamera() {
-            if (videoElement.srcObject) {
-                const tracks = videoElement.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
-            }
-            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-            openCamera(currentFacingMode);
-        }
-
-        // Start with back camera
-        openCamera('environment');
+        openCamera(); // Automatically open camera on page load
     </script>
 </body>
 </html>
