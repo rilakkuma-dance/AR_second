@@ -8,139 +8,155 @@
     <style>
         /* Previous styles remain the same */
         body {
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          font-family: Arial, sans-serif;
-          position: relative;
-          overflow: hidden;
-        }
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #cameraFeed {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    #elishaImage {
+      position: absolute;
+      top: 30vh; 
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30vw; 
+      max-width: 300px; 
+      height: auto;
+      z-index: 1;
+    }
+
+    .text-box {
+      position: absolute;
+      top: 15vh;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 2vh 4vw;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 3;
+      width: min(80%, 400px);
+    }
+
+    h1, h2 {
+      margin: 10px 0;
+      font-size: clamp(2em, 5vw, 3.5em);
+      color: black;
+    }
+
+    h2 {
+      font-size: clamp(1.5em, 4vw, 2em);
+    }
+
+    #nextButton {
+      padding: 1.5vh 3vw;
+      font-size: clamp(16px, 2vw, 20px);
+      background: skyblue;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      position: absolute;
+      bottom: 5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20vw;
+      max-width: 200px;
+      z-index: 10;
+    }
+
+    #nextButton:hover { 
+      background: #0056b3;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      transition: 0.3s;
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .back-button::before {
+      content: "←";
+      font-size: 24px;
+      color: black;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      #elishaImage {
+        top: 35vh;
+        width: 60vw;
+      }
+
+      .text-box {
+        width: 90%;
+        top: 13vh;
+      }
+
+      #nextButton {
+        width: 60vw;
+      }
+    }
     
         #cameraFeed {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          object-fit: cover;
-          z-index: -1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -1;
+            transform: scaleX(-1); /* Mirror the camera feed */
         }
-    
-        #elishaImage {
-          position: absolute;
-          top: 30vh; 
-          left: 50%;
-          transform: translateX(-50%);
-          width: 30vw; 
-          max-width: 300px; 
-          height: auto;
-          z-index: 1;
-        }
-    
-        .text-box {
-          position: absolute;
-          top: 15vh;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(255, 255, 255, 0.8);
-          padding: 2vh 4vw;
-          border-radius: 15px;
-          text-align: center;
-          z-index: 3;
-          width: min(80%, 400px);
-        }
-    
-        h1, h2 {
-          margin: 10px 0;
-          font-size: clamp(2em, 5vw, 3.5em);
-          color: black;
-        }
-    
-        h2 {
-          font-size: clamp(1.5em, 4vw, 2em);
-        }
-    
-        #nextButton {
-          padding: 1.5vh 3vw;
-          font-size: clamp(16px, 2vw, 20px);
-          background: skyblue;
-          color: white;
-          border: none;
-          border-radius: 10px;
-          cursor: pointer;
-          transition: 0.3s;
-          position: absolute;
-          bottom: 5vh;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 20vw;
-          max-width: 200px;
-          z-index: 10;
-        }
-    
-        #nextButton:hover { 
-          background: #0056b3;
-        }
-    
-        .back-button {
-          position: absolute;
-          top: 20px;
-          left: 20px;
-          width: 50px;
-          height: 50px;
-          background: rgba(255, 255, 255, 0.8);
-          border-radius: 50%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          cursor: pointer;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-          z-index: 10;
-          transition: 0.3s;
-        }
-    
-        .back-button:hover {
-          background: rgba(255, 255, 255, 1);
-        }
-    
-        .back-button::before {
-          content: "←";
-          font-size: 24px;
-          color: black;
-          font-weight: bold;
-        }
-    
-        @media (max-width: 768px) {
-          #elishaImage {
-            top: 35vh;
-            width: 60vw;
-          }
-    
-          .text-box {
-            width: 90%;
-            top: 13vh;
-          }
-    
-          #nextButton {
-            width: 60vw;
-          }
-        }
-      </style>
+        
+        /* Rest of your existing styles... */
+    </style>
 </head>
 <body>
+    <!-- Add video element for camera feed -->
+    <video id="cameraFeed" autoplay playsinline></video>
+
     <div class="back-button" id="backButton"></div>
 
     <div class="text-box">
-      <h1>Australia</h1>
-      <h2>អូស្ត្រាលី</h2>
+        <h1>Cambodia</h1>
+        <h2>កម្ពុជា។</h2>
     </div>  
     
     <model-viewer 
-        src="australia.glb" 
-        alt="3D Earth Model" 
+        src="angkorwat.glb" 
+        alt="Angkor Wat Model" 
         auto-rotate 
         camera-controls 
         style="width: 100vw; height: 100vh;">
@@ -150,35 +166,53 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-      const nextButton = document.getElementById('nextButton');
-      const backButton = document.getElementById('backButton');
-      
-      // Add touch and click events for better mobile support
-      if (nextButton) {
-        nextButton.addEventListener('touchstart', handleNext, { passive: false });
-        nextButton.addEventListener('click', handleNext);
-      }
+            // Initialize camera
+            initCamera();
+            
+            const nextButton = document.getElementById('nextButton');
+            const backButton = document.getElementById('backButton');
+            
+            if (nextButton) {
+                nextButton.addEventListener('touchstart', handleNext, { passive: false });
+                nextButton.addEventListener('click', handleNext);
+            }
 
-      if (backButton) {
-        backButton.addEventListener('touchstart', handleBack, { passive: false });
-        backButton.addEventListener('click', handleBack);
-      }
-    });
+            if (backButton) {
+                backButton.addEventListener('touchstart', handleBack, { passive: false });
+                backButton.addEventListener('click', handleBack);
+            }
+        });
 
-        // Function to handle next button click
+        // Function to initialize camera
+        async function initCamera() {
+            try {
+                const videoElement = document.getElementById('cameraFeed');
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment' // Use back camera if available
+                    }
+                });
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+            }
+        }
+
         function handleNext(e) {
-      e.preventDefault(); // Prevent default button behavior
-      vibrate(); // Trigger vibration
-      // Small delay before navigation to ensure vibration happens
-      setTimeout(() => {
-        window.location.href = 'cambodia-2.html';
-      }, 50);
-
-      function goBack() {
-      window.location.href = "flagScanner.html"; // Previous page
-    }
-
-    }
-        </script>
+            e.preventDefault();
+            vibrate();
+            setTimeout(() => {
+                window.location.href = 'cambodia-2.html';
+            }, 50);
+        }
+        function handleBack(e) {
+            e.preventDefault(); // Prevent default button behavior
+            vibrate(); // Trigger vibration
+            // Small delay before navigation to ensure vibration happens
+            setTimeout(() => {
+              window.location.href = 'flagScanner.html';
+            }, 50);
+        }
+    </script>
 </body>
 </html>
