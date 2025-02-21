@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Previous styles remain the same */
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #cameraFeed {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    #elishaImage {
+      position: absolute;
+      top: 30vh; 
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30vw; 
+      max-width: 300px; 
+      height: auto;
+      z-index: 1;
+    }
+
+    .text-box {
+      position: absolute;
+      top: 15vh;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 2vh 4vw;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 3;
+      width: min(80%, 400px);
+    }
+
+    h1, h2 {
+      margin: 10px 0;
+      font-size: clamp(2em, 5vw, 3.5em);
+      color: black;
+    }
+
+    h2 {
+      font-size: clamp(1.5em, 4vw, 2em);
+    }
+
+    #nextButton {
+      padding: 1.5vh 3vw;
+      font-size: clamp(16px, 2vw, 20px);
+      background: skyblue;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      position: absolute;
+      bottom: 5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20vw;
+      max-width: 200px;
+      z-index: 10;
+    }
+
+    #nextButton:hover { 
+      background: #0056b3;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      transition: 0.3s;
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .back-button::before {
+      content: "←";
+      font-size: 24px;
+      color: black;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      #elishaImage {
+        top: 35vh;
+        width: 60vw;
+      }
+
+      .text-box {
+        width: 90%;
+        top: 13vh;
+      }
+
+      #nextButton {
+        width: 60vw;
+      }
+    }
+  </style>
+</head>
+<body>
+    <video id="cameraFeed" autoplay playsinline></video>
+  
+    <div class="back-button" id="backButton"></div>
+  
+    <div class="text-box">
+      <h1>Hello! I am Kangaroo.</h1>
+      <h2>សួស្តី! ខ្ញុំជាសត្វកង់ហ្គូរូ</h2>
+    </div>  
+    
+    <img id="kangarooImage" src="kangaroo.png" alt="Kangaroo">
+    <button id="nextButton">Next</button>
+  
+    <!-- Add audio element (hidden) -->
+    <audio id="greetingAudio" preload="auto">
+      <source src="audio/kangaroo.mp3" type="audio/mpeg">
+      <source src="audio/kangaroo.wav" type="audio/wav">
+    </audio>
+  
+    <script>
+      // Audio handling
+      const greetingAudio = document.getElementById('greetingAudio');
+      
+      function playGreeting() {
+        greetingAudio.play()
+          .catch(error => console.log('Error playing audio:', error));
+      }
+  
+      // Function to stop audio
+      function stopAudio() {
+        greetingAudio.pause();
+        greetingAudio.currentTime = 0;
+      }
+  
+      // Function to handle vibration
+      function vibrate() {
+        if ('vibrate' in navigator) {
+          try {
+            navigator.vibrate(200);
+          } catch (e) {
+            console.log('Vibration failed:', e);
+          }
+        } else {
+          console.log('Vibration not supported');
+        }
+      }
+  
+      // Function to handle next button click
+      function handleNext(e) {
+        e.preventDefault();
+        vibrate();
+        stopAudio(); // Stop any playing audio
+        setTimeout(() => {
+          window.location.href = 'kangaroo-2.html';
+        }, 50);
+      }
+  
+      // Function to handle back button click
+      function handleBack(e) {
+        e.preventDefault();
+        vibrate();
+        stopAudio(); // Stop any playing audio
+        setTimeout(() => {
+          window.location.href = 'australia-2.html';
+        }, 50);
+      }
+  
+      // Camera handling
+      let cameraStream;
+  
+      function openCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then((stream) => {
+            cameraStream = stream;
+            const videoElement = document.getElementById("cameraFeed");
+  
+            if (videoElement) {
+              videoElement.srcObject = stream;
+              sessionStorage.setItem("cameraAccess", "granted");
+            } else {
+              console.error("Camera video element not found. Retrying...");
+              setTimeout(openCamera, 500);
+            }
+          })
+          .catch((error) => {
+            console.error("Camera access denied:", error);
+            sessionStorage.setItem("cameraAccess", "denied");
+          });
+      }
+  
+      // Initialize everything when the page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        const nextButton = document.getElementById('nextButton');
+        const backButton = document.getElementById('backButton');
+        
+        if (nextButton) {
+          nextButton.addEventListener('touchstart', handleNext, { passive: false });
+          nextButton.addEventListener('click', handleNext);
+        }
+  
+        if (backButton) {
+          backButton.addEventListener('touchstart', handleBack, { passive: false });
+          backButton.addEventListener('click', handleBack);
+        }
+  
+        // Play greeting after a short delay to ensure everything is loaded
+        setTimeout(playGreeting, 1000);
+      });
+  
+      // Clean up when leaving the page
+      window.addEventListener('beforeunload', function() {
+        stopAudio();
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+        }
+      });
+  
+      // Initialize camera after page load
+      window.addEventListener('load', openCamera);
+    </script>
+  </body>
+  </html>
