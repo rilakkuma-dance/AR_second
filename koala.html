@@ -129,148 +129,124 @@
   </style>
 </head>
 <body>
-  <video id="cameraFeed" autoplay playsinline></video>
-
-  <div class="back-button" id="backButton"></div>
-
-  <div class="text-box">
-    <h1>Hello! I am Koala.</h1>
-    <h2>សួស្តី! ខ្ញុំជាកូឡា</h2>
-  </div>  
+    <video id="cameraFeed" autoplay playsinline></video>
   
-  <img id="koalaImage" src="koala.png" alt="Koala">
-  <button id="nextButton">Next</button>
-
-  <script>
-    // Speech synthesis setup
-    const speechSynthesis = window.speechSynthesis;
-    let voices = [];
-
-    function loadVoices() {
-      voices = speechSynthesis.getVoices();
-    }
-
-    // Load voices when they become available
-    speechSynthesis.onvoiceschanged = loadVoices;
-    loadVoices(); // Initial load attempt
-
-    function speak(text, lang = 'en-US') {
-      // Cancel any ongoing speech
-      speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      utterance.rate = 0.9; // Slightly slower for clarity
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      // Find appropriate voice for the language
-      const voice = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
-      if (voice) {
-        utterance.voice = voice;
-      }
-
-      speechSynthesis.speak(utterance);
-    }
-
-    // Function to play greeting in both languages
-    function playGreeting() {
-      // Small delay to ensure voices are loaded
-      setTimeout(() => {
-        speak("Hello! I am Koala.", "en-US");
-        
-        // Wait for English to finish before playing Khmer
-        setTimeout(() => {
-          speak("សួស្តី! ខ្ញុំជាកូឡា", "km-KH");
-        }, 2000); // Adjust timing as needed
-      }, 500);
-    }
-
-    // Function to handle vibration
-    function vibrate() {
-      if ('vibrate' in navigator) {
-        try {
-          navigator.vibrate(200);
-        } catch (e) {
-          console.log('Vibration failed:', e);
-        }
-      } else {
-        console.log('Vibration not supported');
-      }
-    }
-
-    // Function to handle next button click
-    function handleNext(e) {
-      e.preventDefault();
-      vibrate();
-      speechSynthesis.cancel(); // Stop any ongoing speech
-      setTimeout(() => {
-        window.location.href = 'intro1-2.html';
-      }, 50);
-    }
-
-    // Function to handle back button click
-    function handleBack(e) {
-      e.preventDefault();
-      vibrate();
-      speechSynthesis.cancel(); // Stop any ongoing speech
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 50);
-    }
-
-    // Camera handling
-    let cameraStream;
-
-    function openCamera() {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then((stream) => {
-          cameraStream = stream;
-          const videoElement = document.getElementById("cameraFeed");
-
-          if (videoElement) {
-            videoElement.srcObject = stream;
-            sessionStorage.setItem("cameraAccess", "granted");
-          } else {
-            console.error("Camera video element not found. Retrying...");
-            setTimeout(openCamera, 500);
-          }
-        })
-        .catch((error) => {
-          console.error("Camera access denied:", error);
-          sessionStorage.setItem("cameraAccess", "denied");
-        });
-    }
-
-    // Initialize everything when the page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      const nextButton = document.getElementById('nextButton');
-      const backButton = document.getElementById('backButton');
+    <div class="back-button" id="backButton"></div>
+  
+    <div class="text-box">
+      <h1>Hello! I am Koala.</h1>
+      <h2>សួស្តី! ខ្ញុំជាកូឡា</h2>
+    </div>  
+    
+    <img id="koalaImage" src="koala.png" alt="Koala">
+    <button id="nextButton">Next</button>
+  
+    <!-- Add audio element (hidden) -->
+    <audio id="greetingAudio" preload="auto">
+      <source src="audio/koala.mp3" type="audio/mpeg">
+      <source src="audio/koala.wav" type="audio/wav">
+    </audio>
+  
+    <script>
+      // Audio handling
+      const greetingAudio = document.getElementById('greetingAudio');
       
-      if (nextButton) {
-        nextButton.addEventListener('touchstart', handleNext, { passive: false });
-        nextButton.addEventListener('click', handleNext);
+      function playGreeting() {
+        greetingAudio.play()
+          .catch(error => console.log('Error playing audio:', error));
       }
-
-      if (backButton) {
-        backButton.addEventListener('touchstart', handleBack, { passive: false });
-        backButton.addEventListener('click', handleBack);
+  
+      // Function to stop audio
+      function stopAudio() {
+        greetingAudio.pause();
+        greetingAudio.currentTime = 0;
       }
-
-      // Play greeting after a short delay to ensure everything is loaded
-      setTimeout(playGreeting, 1000);
-    });
-
-    // Clean up when leaving the page
-    window.addEventListener('beforeunload', function() {
-      speechSynthesis.cancel(); // Stop any ongoing speech
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+  
+      // Function to handle vibration
+      function vibrate() {
+        if ('vibrate' in navigator) {
+          try {
+            navigator.vibrate(200);
+          } catch (e) {
+            console.log('Vibration failed:', e);
+          }
+        } else {
+          console.log('Vibration not supported');
+        }
       }
-    });
-
-    // Initialize camera after page load
-    window.addEventListener('load', openCamera);
-  </script>
-</body>
-</html>
+  
+      // Function to handle next button click
+      function handleNext(e) {
+        e.preventDefault();
+        vibrate();
+        stopAudio(); // Stop any playing audio
+        setTimeout(() => {
+          window.location.href = 'koala-2.html';
+        }, 50);
+      }
+  
+      // Function to handle back button click
+      function handleBack(e) {
+        e.preventDefault();
+        vibrate();
+        stopAudio(); // Stop any playing audio
+        setTimeout(() => {
+          window.location.href = 'australia-2.html';
+        }, 50);
+      }
+  
+      // Camera handling
+      let cameraStream;
+  
+      function openCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then((stream) => {
+            cameraStream = stream;
+            const videoElement = document.getElementById("cameraFeed");
+  
+            if (videoElement) {
+              videoElement.srcObject = stream;
+              sessionStorage.setItem("cameraAccess", "granted");
+            } else {
+              console.error("Camera video element not found. Retrying...");
+              setTimeout(openCamera, 500);
+            }
+          })
+          .catch((error) => {
+            console.error("Camera access denied:", error);
+            sessionStorage.setItem("cameraAccess", "denied");
+          });
+      }
+  
+      // Initialize everything when the page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        const nextButton = document.getElementById('nextButton');
+        const backButton = document.getElementById('backButton');
+        
+        if (nextButton) {
+          nextButton.addEventListener('touchstart', handleNext, { passive: false });
+          nextButton.addEventListener('click', handleNext);
+        }
+  
+        if (backButton) {
+          backButton.addEventListener('touchstart', handleBack, { passive: false });
+          backButton.addEventListener('click', handleBack);
+        }
+  
+        // Play greeting after a short delay to ensure everything is loaded
+        setTimeout(playGreeting, 1000);
+      });
+  
+      // Clean up when leaving the page
+      window.addEventListener('beforeunload', function() {
+        stopAudio();
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+        }
+      });
+  
+      // Initialize camera after page load
+      window.addEventListener('load', openCamera);
+    </script>
+  </body>
+  </html>
